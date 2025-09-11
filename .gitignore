@@ -1,0 +1,70 @@
+# ROS 2 build directories
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# C++
+*.o
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ROS specific
+.catkin_workspace
+.catkin_tools/
+devel/
+logs/
+.rosinstall
+.rosinstall.bak
+
+# Colcon
+.colcon_cd_root
+.colcon/
+
+# Custom ignores for this project
+*.bag
+*.db
+*.pcd
+*.ply

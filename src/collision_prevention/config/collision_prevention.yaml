@@ -1,0 +1,15 @@
+# Collision Prevention Node Configuration
+# This file configures the LaserScan to ObstacleDistance converter for PX4 collision prevention
+
+collision_prevention_node:
+  ros__parameters:
+    # Topic configuration
+    input_topic: "/ld19_sim/scan"           # Input LaserScan topic from LiDAR sensor
+    output_topic: "/px4_0/fmu/in/obstacle_distance"  # Output topic for PX4 collision prevention
+    
+    # Sensor processing configuration
+    sector_size_deg: 5                  # PX4 standard sector size (5 degrees)
+    
+    # Debug configuration
+    debug_output: true                  # Enable detailed debug logging
+    publish_rate_hz: 100                  # Target rate for publishing obstacle data

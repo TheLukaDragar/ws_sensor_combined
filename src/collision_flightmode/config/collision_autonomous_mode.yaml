@@ -1,0 +1,27 @@
+# Collision Aware Autonomous Flight Mode Configuration
+# This file configures the autonomous flight mode with VDB mapping collision avoidance
+
+collision_autonomous_mode_node:
+  ros__parameters:
+    # Navigation parameters
+    waypoint_tolerance: 1.0        # Distance to consider waypoint reached (meters)
+    max_speed: 3.0                # Maximum flight speed (m/s)
+    
+    # Collision avoidance parameters  
+    collision_distance_threshold: 2.0  # Minimum distance to obstacles (meters)
+    guidance_angle_deg: 30.0          # Max deviation angle for avoidance (degrees)
+    
+    # VDB Mapping Integration (NEW - using spherical interpolation pointclouds)
+    use_vdb_mapping: true             # Enable VDB 3D mapping (preferred over LaserScan)
+    ambient_pointcloud_topic: "/ambient_pointcloud"  # Spherical interpolation output
+    occupancy_grid_topic: "/vdb_mapping/vdb_map_occupancy"  # VDB persistent map
+    
+    # LaserScan fallback (legacy 2D detection)
+    laser_scan_topic: "/ld19_sim/scan"  # 2D LaserScan topic (fallback only)
+    
+    # Debug and logging
+    debug_output: true             # Enable detailed debug output
+    
+    # Advanced parameters
+    obstacle_data_timeout: 0.5     # Timeout for obstacle data (seconds)
+    velocity_timeout: 0.5          # Timeout for velocity commands (seconds)

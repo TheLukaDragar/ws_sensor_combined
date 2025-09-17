@@ -4,3 +4,6 @@
 [submodule "src/px4-ros2-interface-lib"]
 	path = src/px4-ros2-interface-lib
 	url = https://github.com/TheLukaDragar/px4-ros2-interface-lib.git
+[submodule "src/px4_ros_com"]
+	path = src/px4_ros_com
+	url = https://github.com/TheLukaDragar/px4_ros_com.git

@@ -28,7 +28,14 @@ public:
   {
     // Create TF broadcasters
     _tf_broadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-    _static_tf_broadcaster = std::make_unique<tf2_ros::StaticTransformBroadcaster>(*this);
+    
+    // Use TRANSIENT_LOCAL durability for static TF (correct ROS2 standard)
+    rclcpp::QoS static_tf_qos = rclcpp::QoS(100)
+      .reliability(rclcpp::ReliabilityPolicy::Reliable)
+      .durability(rclcpp::DurabilityPolicy::TransientLocal)  // Correct ROS2 standard for static TF
+      .history(rclcpp::HistoryPolicy::KeepLast);
+    
+    _static_tf_broadcaster = std::make_unique<tf2_ros::StaticTransformBroadcaster>(*this, static_tf_qos);
       //_vehicle_local_position = std::make_shared<px4_ros2::OdometryLocalPosition>(*this);
 
     //..ODOMETY ISPUBLISED SO WE HAVE A VALDI TRANSFORM BEEWEN LOCAL ORIGIN AND PX4 BODY!!!
@@ -58,7 +65,7 @@ public:
 
     RCLCPP_INFO(this->get_logger(), "PX4 TF Publisher initialized!");
     RCLCPP_INFO(this->get_logger(), "Publishing: local_origin -> px4_body transform");
-    RCLCPP_INFO(this->get_logger(), "Publishing static transforms: map -> World, map -> local_origin, px4_body -> ld19_frame");
+    RCLCPP_INFO(this->get_logger(), "Publishing static transforms: World -> local_origin, px4_body -> ld19_frame, px4_body -> camera_frame");
     RCLCPP_INFO(this->get_logger(), "Subscribing to: /px4_0/fmu/out/vehicle_odometry");
   }
 
@@ -117,11 +124,32 @@ private:
     debug_to_ld.transform.rotation.w = 1.0;
     static_transforms.push_back(debug_to_ld);
     
+    // Create transform from px4_body to camera_frame
+    geometry_msgs::msg::TransformStamped body_to_camera;
+    body_to_camera.header.stamp = this->get_clock()->now();
+    body_to_camera.header.frame_id = "px4_body";  // Parent frame
+    body_to_camera.child_frame_id = "sim_camera"; // Camera child frame
+    body_to_camera.transform.translation.x = 0.11;  // 11cm forward from body
+    body_to_camera.transform.translation.y = 0.0;
+    body_to_camera.transform.translation.z = 0.0;   // Same height as body
+    
+    // Camera orientation: +90° Yaw + 90° Pitch (removed the 180° twist that made image upside down)
+    // Forward-facing camera without upside-down image
+    Eigen::AngleAxisd camera_yaw(M_PI_2, Eigen::Vector3d::UnitZ());    // +90° around Z-axis 
+    Eigen::AngleAxisd camera_pitch(M_PI_2, Eigen::Vector3d::UnitY());  // 90° around Y-axis to lift from ground
+    Eigen::Quaterniond q_camera = camera_pitch * camera_yaw;  // Apply yaw, then pitch (no twist!)
+    body_to_camera.transform.rotation.x = q_camera.x();
+    body_to_camera.transform.rotation.y = q_camera.y();
+    body_to_camera.transform.rotation.z = q_camera.z();
+    body_to_camera.transform.rotation.w = q_camera.w();
+    static_transforms.push_back(body_to_camera);
+    
     // Publish all static transforms
     _static_tf_broadcaster->sendTransform(static_transforms);
     
     RCLCPP_INFO(this->get_logger(), "Published static transforms:");
     RCLCPP_INFO(this->get_logger(), "px4_body -> px4_body_ld19_frame with transform [0, 0, 0.05]");
+    RCLCPP_INFO(this->get_logger(), "px4_body -> sim_camera with transform [0.11, 0, 0] and rotation Yaw(+90°) * Pitch(90°)");
   
   }
 
